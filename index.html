@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Chat en tiempo real con salas, emojis, audio, voz y más — powered by Firebase" />
+  <title>ChatLocal — Chat en Tiempo Real</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=4" />
+</head>
+
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════════
+     SPLASH / LOGIN
+════════════════════════════════════════════════════════════ -->
+  <div id="splash" class="splash">
+    <div class="splash-card">
+      <div class="splash-logo">
+        <span class="logo-icon">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="48" height="48" rx="14" fill="url(#logoGrad)" />
+            <path
+              d="M12 16C12 13.79 13.79 12 16 12H32C34.21 12 36 13.79 36 16V27C36 29.21 34.21 31 32 31H26L20 36V31H16C13.79 31 12 29.21 12 27V16Z"
+              fill="white" />
+            <defs>
+              <linearGradient id="logoGrad" x1="0" y1="0" x2="48" y2="48">
+                <stop stop-color="#E52D27" />
+                <stop offset="0.5" stop-color="#F5A623" />
+                <stop offset="1" stop-color="#c0392b" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </span>
+        <h1>ChatLocal</h1>
+        <p>Chat en tiempo real · Salas · Voz · Emojis</p>
+      </div>
+      <div class="auth-form" id="loginSection">
+        <div class="auth-tabs">
+          <button id="loginTab" class="auth-tab active">Iniciar sesión</button>
+          <button id="registerTab" class="auth-tab">Registrarse</button>
+        </div>
+        
+        <div id="loginForm" class="auth-panel">
+          <label for="loginEmail">Email</label>
+          <input id="loginEmail" type="email" placeholder="tu@email.com" autocomplete="email" />
+          <label for="loginPass">Contraseña</label>
+          <input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password" />
+          <button id="loginBtn" class="auth-btn">Ingresar <span>→</span></button>
+          <p class="splash-hint">¿No tienes cuenta? <a href="#" id="switchToRegister">Regístrate</a></p>
+        </div>
+        
+        <div id="registerForm" class="auth-panel hidden">
+          <label for="regName">Nombre</label>
+          <input id="regName" type="text" placeholder="Tu nombre" maxlength="20" />
+          <label for="regEmail">Email</label>
+          <input id="regEmail" type="email" placeholder="tu@email.com" autocomplete="email" />
+          <label for="regPass">Contraseña (mín. 6 caracteres)</label>
+          <input id="regPass" type="password" placeholder="••••••••" autocomplete="new-password" />
+          <button id="registerBtn" class="auth-btn">Crear cuenta <span>→</span></button>
+          <p class="splash-hint">¿Ya tienes cuenta? <a href="#" id="switchToLogin">Inicia sesión</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+     APP SHELL
+════════════════════════════════════════════════════════════ -->
+  <div id="app" class="app hidden">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <span class="logo-small">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M5 5C5 3.34 6.34 2 8 2H16C17.66 2 19 3.34 19 5V14C19 15.66 17.66 17 16 17H13L9 21V17H8C6.34 17 5 15.66 5 14V5Z"
+              fill="url(#sidebarGrad)" />
+            <defs>
+              <linearGradient id="sidebarGrad" x1="5" y1="2" x2="19" y2="21">
+                <stop stop-color="#E52D27" />
+                <stop offset="1" stop-color="#F5A623" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </span>
+        <span class="brand">ChatLocal</span>
+        <div class="user-pill" id="userPill">
+          <div id="userAvatar" class="avatar-mini"></div>
+          <span id="userName"></span>
+          <svg class="user-pill-edit" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </div>
+        <button id="themeToggleBtn" class="icon-btn theme-btn" title="Cambiar tema">
+          <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+          <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+          </svg>
+        </button>
+        <button id="logoutBtn" class="icon-btn" title="Cerrar sesión">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="rooms-label">SALAS</div>
+      <ul id="roomList" class="room-list"></ul>
+
+      <button id="createRoomBtn" class="create-room-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        Nueva sala
+      </button>
+
+      <div class="sidebar-footer">
+      </div>
+    </aside>
+
+    <!-- MAIN CHAT -->
+    <main class="chat-main">
+      <!-- Header -->
+      <header class="chat-header">
+        <div class="chat-header-left">
+          <span id="roomIcon" class="room-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+          </span>
+          <div>
+            <h2 id="roomName">Selecciona una sala</h2>
+            <span id="memberCount" class="member-count">0 participantes</span>
+          </div>
+        </div>
+        <div class="chat-header-right">
+          <button id="membersBtn" class="icon-btn" title="Ver miembros">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Messages -->
+      <div id="messagesArea" class="messages-area">
+        <div class="empty-state" id="emptyState">
+          <div class="empty-icon">
+            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"
+              stroke-linecap="round" stroke-linejoin="round" opacity="0.35">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+          </div>
+          <p>Elige una sala para empezar a chatear</p>
+        </div>
+      </div>
+
+      <!-- Typing indicator -->
+      <div id="typingIndicator" class="typing-indicator hidden">
+        <span class="typing-dots"><span></span><span></span><span></span></span>
+        <span id="typingText"></span>
+      </div>
+
+      <!-- Input bar -->
+      <div class="input-bar" id="inputBar">
+        <button id="emojiToggleBtn" class="icon-btn" title="Emojis">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+            <line x1="9" y1="9" x2="9.01" y2="9" />
+            <line x1="15" y1="9" x2="15.01" y2="9" />
+          </svg>
+        </button>
+        <button id="attachBtn" class="icon-btn" title="Adjuntar archivo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+          </svg>
+        </button>
+        <input type="file" id="fileInput" style="display:none" multiple />
+        <div class="input-wrap">
+          <textarea id="msgInput" placeholder="Escribe un mensaje…" rows="1" disabled></textarea>
+        </div>
+        <button id="audioRecordBtn" class="icon-btn" title="Grabar audio" disabled>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+            <line x1="12" y1="19" x2="12" y2="23" />
+            <line x1="8" y1="23" x2="16" y2="23" />
+          </svg>
+        </button>
+        <button id="sendBtn" class="send-btn" disabled>
+          <svg viewBox="0 0 24 24">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Emoji picker -->
+      <div id="emojiPicker" class="emoji-picker hidden"></div>
+    </main>
+
+    <!-- MEMBERS PANEL -->
+    <aside class="members-panel hidden" id="membersPanel">
+      <div class="members-header">
+        <h3>Participantes</h3>
+        <button id="closeMembersBtn" class="icon-btn" title="Cerrar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <ul id="membersList" class="members-list"></ul>
+    </aside>
+  </div>
+
+  <!-- CREATE ROOM MODAL -->
+  <div id="createRoomModal" class="modal hidden">
+    <div class="modal-card">
+      <h3>Crear sala</h3>
+      <div class="icon-picker" id="iconPicker">
+      </div>
+      <input id="newRoomName" type="text" placeholder="Nombre de la sala" maxlength="30" />
+      <div class="modal-actions">
+        <button id="cancelRoomBtn" class="btn-secondary">Cancelar</button>
+        <button id="confirmRoomBtn" class="btn-primary">Crear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT MESSAGE MODAL -->
+  <div id="editModal" class="modal hidden">
+    <div class="modal-card">
+      <h3>Editar mensaje</h3>
+      <textarea id="editInput" rows="3" placeholder="Edita tu mensaje…" maxlength="500" style="background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px 14px;color:var(--text-1);font-size:.9rem;resize:vertical;width:100%"></textarea>
+      <div class="modal-actions">
+        <button id="cancelEditBtn" class="btn-secondary">Cancelar</button>
+        <button id="confirmEditBtn" class="btn-primary">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE MODAL -->
+  <div id="profileModal" class="modal hidden">
+    <div class="modal-card profile-modal-card">
+      <h3>✏️ Editar Perfil</h3>
+
+      <!-- Avatar grande clicable -->
+      <div class="profile-avatar-wrap" id="profileAvatarWrap" title="Cambiar foto">
+        <div id="profileAvatarPreview" class="profile-avatar-preview"></div>
+        <div class="profile-avatar-overlay">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <span>Cambiar foto</span>
+        </div>
+        <input type="file" id="profilePhotoInput" accept="image/*" style="display:none" />
+      </div>
+
+      <!-- Nombre -->
+      <div class="profile-field">
+        <label for="profileNameInput">Nombre de usuario</label>
+        <input id="profileNameInput" type="text" placeholder="Tu nombre" maxlength="30" />
+      </div>
+
+      <!-- Progreso de subida -->
+      <div id="profileUploadStatus" class="profile-upload-status hidden"></div>
+
+      <div class="modal-actions">
+        <button id="cancelProfileBtn" class="btn-secondary">Cancelar</button>
+        <button id="saveProfileBtn" class="btn-primary">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>
